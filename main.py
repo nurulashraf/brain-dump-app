@@ -34,7 +34,7 @@ def parse_brain_dump(text_input):
 
     try:
         # UPDATED: Use the 'client' variable we created above
-        response = client.models.generate_content(model="gemini-2.0-flash", contents=prompt)
+        response = client.models.generate_content(model="gemma-3-1b-it", contents=prompt)
         # Note: I changed the model to 'gemini-2.0-flash' or 'gemini-1.5-flash' 
         # because 'gemma-3-1b-it' might not be available via the API yet depending on your region/access.
         
