@@ -16,7 +16,7 @@ st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-    /* Global Overrides - Force Light Mode Aesthetics */
+    /* Global Overrides */
     .stApp {
         background-color: #F5F5F7 !important;
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
@@ -24,31 +24,31 @@ st.markdown("""
 
     /* Main Container */
     .main .block-container {
-        padding-top: 5rem !important;
-        padding-bottom: 5rem !important;
-        max-width: 800px !important;
+        padding-top: 4rem !important;
+        padding-bottom: 4rem !important;
+        max-width: min(800px, 100% - 2rem) !important;
         margin: auto;
     }
 
-    /* Typography - Force Contrast */
+    /* Typography */
     h1, h2, h3, h4, .stMarkdown, p, span, label {
         color: #1D1D1F !important;
         font-family: 'Inter', sans-serif !important;
     }
-    
+
     .hero-title {
-        font-size: 3.5rem !important;
+        font-size: clamp(2rem, 8vw, 3.5rem) !important;
         font-weight: 700 !important;
         letter-spacing: -0.03em !important;
         margin-bottom: 0.5rem !important;
         color: #1D1D1F !important;
     }
-    
+
     .hero-subtitle {
-        font-size: 1.4rem !important;
+        font-size: clamp(1rem, 4vw, 1.4rem) !important;
         color: #86868B !important;
         font-weight: 400 !important;
-        margin-bottom: 4rem !important;
+        margin-bottom: 3rem !important;
     }
 
     /* Step Labels */
@@ -65,14 +65,20 @@ st.markdown("""
         margin-bottom: 1rem !important;
     }
 
-    /* Apple-style Cards */
-    .cupertino-card {
+    /* Apple-style Cards via st.container(border=True) */
+    div[data-testid="stVerticalBlockBorderWrapper"] {
         background: white !important;
-        padding: 3rem !important;
-        border-radius: 30px !important;
+        padding: clamp(1.5rem, 4vw, 3rem) !important;
+        border-radius: clamp(20px, 4vw, 30px) !important;
         box-shadow: 0 20px 40px rgba(0,0,0,0.06) !important;
-        margin-bottom: 2.5rem !important;
-        border: 1px solid rgba(0,0,0,0.01) !important;
+        margin-bottom: 2rem !important;
+        border: 1px solid rgba(0,0,0,0.03) !important;
+    }
+
+    /* Remove inner container's default border/padding so our card style is the only one */
+    div[data-testid="stVerticalBlockBorderWrapper"] > div {
+        border: none !important;
+        padding: 0 !important;
     }
 
     /* Primary Action Buttons */
@@ -136,11 +142,50 @@ st.markdown("""
         overflow: hidden !important;
     }
 
+    /* Recommendation box */
+    .rec-box {
+        background-color: #F5F5F7 !important;
+        padding: 2rem !important;
+        border-radius: 20px !important;
+        border-left: 6px solid #007AFF !important;
+    }
+    .rec-box p {
+        color: #1D1D1F !important;
+    }
+
     /* Hide standard UI fluff */
     #MainMenu {visibility: hidden;}
     header {visibility: hidden;}
     footer {visibility: hidden;}
     .reportview-container .main footer {visibility: hidden;}
+
+    /* --- Mobile Responsive --- */
+    @media (max-width: 768px) {
+        .main .block-container {
+            padding-top: 2rem !important;
+            padding-bottom: 2rem !important;
+        }
+
+        .hero-subtitle {
+            margin-bottom: 2rem !important;
+        }
+
+        div.stButton > button {
+            padding: 0.7rem 1.5rem !important;
+            font-size: 1rem !important;
+        }
+
+        .stTextArea textarea {
+            padding: 1rem !important;
+            font-size: 1rem !important;
+            border-radius: 14px !important;
+        }
+
+        .rec-box {
+            padding: 1.5rem !important;
+            border-radius: 16px !important;
+        }
+    }
 
 </style>
 """, unsafe_allow_html=True)
@@ -191,54 +236,49 @@ if 'tasks' not in st.session_state:
     st.session_state.tasks = []
 
 # Step 1: Capture
-st.markdown('<div class="cupertino-card">', unsafe_allow_html=True)
-st.markdown('<div class="step-badge">Capture</div>', unsafe_allow_html=True)
-st.markdown('<h2 style="margin-top:0;">What\'s on your mind?</h2>', unsafe_allow_html=True)
-st.markdown('<p style="color:#86868B; margin-bottom:2rem;">Pour your thoughts. We will distill them into actionable steps.</p>', unsafe_allow_html=True)
+with st.container(border=True):
+    st.markdown('<div class="step-badge">Capture</div>', unsafe_allow_html=True)
+    st.markdown('<h2 style="margin-top:0;">What\'s on your mind?</h2>', unsafe_allow_html=True)
+    st.markdown('<p style="color:#86868B; margin-bottom:2rem;">Pour your thoughts. We will distill them into actionable steps.</p>', unsafe_allow_html=True)
 
-notes = st.text_area("Input", placeholder="Write anything here...", height=200, label_visibility="collapsed")
+    notes = st.text_area("Input", placeholder="Write anything here...", height=200, label_visibility="collapsed")
 
-col1, col2, col3 = st.columns([1, 1.5, 1])
-with col2:
-    if st.button("Distill Thoughts"):
-        if notes:
-            with st.spinner(""):
-                st.session_state.tasks = extract_tasks(notes)
-                st.rerun()
-        else:
-            st.toast("Entrance required.")
-st.markdown('</div>', unsafe_allow_html=True)
+    col1, col2, col3 = st.columns([1, 1.5, 1])
+    with col2:
+        if st.button("Distill Thoughts"):
+            if notes:
+                with st.spinner(""):
+                    st.session_state.tasks = extract_tasks(notes)
+                    st.rerun()
+            else:
+                st.toast("Entrance required.")
 
 # Step 2: Focus
 if st.session_state.tasks:
-    st.markdown('<div class="cupertino-card">', unsafe_allow_html=True)
-    st.markdown('<div class="step-badge">Focus</div>', unsafe_allow_html=True)
-    st.markdown('<h2 style="margin-top:0;">Precision Selection</h2>', unsafe_allow_html=True)
-    
-    st.dataframe(st.session_state.tasks, use_container_width=True, hide_index=True)
-    
-    st.markdown("<br>", unsafe_allow_html=True)
-    c1, c2 = st.columns(2)
-    with c1:
-        time_sel = st.slider("Time Window", 5, 120, 30, format="%d min")
-    with c2:
-        energy_sel = st.select_slider("Energy Level", options=["Resting", "Low", "Neutral", "High", "Peak"], value="Neutral")
-    
-    if st.button("Recommended Path"):
-        with st.spinner(""):
-            recommendation = recommend_focus(st.session_state.tasks, time_sel, energy_sel)
-            st.session_state.rec_text = recommendation
+    with st.container(border=True):
+        st.markdown('<div class="step-badge">Focus</div>', unsafe_allow_html=True)
+        st.markdown('<h2 style="margin-top:0;">Precision Selection</h2>', unsafe_allow_html=True)
 
-    if 'rec_text' in st.session_state:
-        st.markdown("<br>", unsafe_allow_html=True)
-        st.markdown(f"""
-        <div style="background-color: #F5F5F7; padding: 2rem; border-radius: 20px; border-left: 6px solid #007AFF;">
-            <p style="font-weight: 600; font-size: 1.2rem; margin-bottom: 1rem;">Optimized Decision</p>
-            {st.session_state.rec_text}
-        </div>
-        """, unsafe_allow_html=True)
+        st.dataframe(st.session_state.tasks, use_container_width=True, hide_index=True)
 
-    st.markdown('</div>', unsafe_allow_html=True)
+        c1, c2 = st.columns(2)
+        with c1:
+            time_sel = st.slider("Time Window", 5, 120, 30, format="%d min")
+        with c2:
+            energy_sel = st.select_slider("Energy Level", options=["Resting", "Low", "Neutral", "High", "Peak"], value="Neutral")
+
+        if st.button("Recommended Path"):
+            with st.spinner(""):
+                recommendation = recommend_focus(st.session_state.tasks, time_sel, energy_sel)
+                st.session_state.rec_text = recommendation
+
+        if 'rec_text' in st.session_state:
+            st.markdown(f"""
+            <div class="rec-box">
+                <p style="font-weight: 600; font-size: 1.2rem; margin-bottom: 1rem;">Optimized Decision</p>
+                {st.session_state.rec_text}
+            </div>
+            """, unsafe_allow_html=True)
 
     # Global Actions
     bc1, bc2, bc3 = st.columns([2, 1, 2])
