@@ -1,1 +1,1 @@
-# bran-dump-app
+# brain-dump-app
